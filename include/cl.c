@@ -111,9 +111,6 @@ char* read_cpuinfo()
         if(!(strncmp(str, "model name", 10)))
         {
             rmws(str, '\n');
-            printf("%s", str);
-
-            rmws(str, '\n');
             for(int i = 0; i < strlen(str); ++i)
             {
                 if(str[i] == ':')
