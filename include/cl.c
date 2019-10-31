@@ -17,7 +17,7 @@
  Versucht eine Verbidnung zu einem Server auf dem Port 3306 aufzubauen
  Gibt -1 zurück wenn die Verbindung nicht hergestellt worden konnte
 */
-int connectto(char *inetaddr)
+int connectto(char *inetaddr, int port)
 {
     int sock;
     int size;
@@ -34,7 +34,7 @@ int connectto(char *inetaddr)
     inet_aton(inetaddr, &address.sin_addr);
 
     address.sin_family = AF_INET;
-    address.sin_port = htons(3306);
+    address.sin_port = htons(port);
 
     if(connect(sock, (struct sockaddr*) &address, sizeof(address)) != 0)
     {
@@ -195,9 +195,9 @@ char* read_hostname()
 }
 
 //Initialiesiert einen Datenobjekt, dass an den Server übertragen werden soll
-hostdata* hostdata_init()
+hdata_t* hdata_init()
 {
-    hostdata *data = malloc(sizeof(struct _hostdata));
+    hdata_t *data = malloc(sizeof(struct _hostdata));
 
     //TODO: Einfügen von guter Fehlerbehandlung
     data->name = read_hostname();
@@ -219,7 +219,39 @@ hostdata* hostdata_init()
     return data;
 }
 
-int hostdata_del(hostdata *data)
+void hdata_del(hdata_t *data)
 {
+    free(data->name);
+    free(data->cpu);
+    free(data->kernel);
+    free(data);
+}
 
+int send_data(int sock_fd, hdata_t *data)
+{
+    int size;
+
+    char buffer[BUF];
+
+    if ( send(sock_fd, data->name, strlen(data->name), 0) < 0)
+    {
+        return -1;
+    }
+
+    size = recv(sock_fd, buffer, BUF-1, 0);
+
+    if (size > 0)
+    {
+        buffer[size] = '\0';
+    }
+
+    if(*buffer == '0')
+    {
+    }else if(*buffer == '1')
+    {
+        fprintf(stderr, "ERROR");
+        return 1;
+    }
+
+    return 0;
 }

@@ -3,6 +3,8 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <arpa/inet.h>
+#include <unistd.h>
+#include <string.h>
 
 #include "cl.h"
 
@@ -10,19 +12,22 @@
 int main (int argc, char **argv)
 {
     int sock;
-    hostdata* data = hostdata_init();
+    hdata_t *data = hdata_init();
+    int size;
 
-    printf("%s\n", data->name);
+    printf("%i\n", strlen(data->name));
     printf("%s\n", data->kernel);
     printf("%s\n",data->cpu);
 
 
-    if ((sock = connectto(NULL)) < 0)
+    if ((sock = connectto(NULL, 6661)) < 0)
     {
        printf("Verbindung mit dem Server konnte nicht aufgenommen werden\n");
        return EXIT_FAILURE;
     }
 
-    free(data);
+    send_data(sock, data);
+
+    hdata_del(data);
 
 }
