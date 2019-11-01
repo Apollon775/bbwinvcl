@@ -136,10 +136,6 @@ char* read_addr()
     
 }
 
-char* read_mac()
-{
-
-}
 
 
 
@@ -191,7 +187,6 @@ char* read_hostname()
 
     return str;
 
-    #undef BUFFER 
 }
 
 //Initialiesiert einen Datenobjekt, dass an den Server übertragen werden soll
@@ -231,10 +226,12 @@ int send_data(int sock_fd, hdata_t *data)
 {
     int size;
 
-    char buffer[BUF];
+    char* buffer = malloc(BUF);
 
-    if ( send(sock_fd, data->name, strlen(data->name), 0) < 0)
+    if (send(sock_fd, data->name, strlen(data->name), 0)  != strlen(data->name))
     {
+        printf("First send() error");
+        free(buffer);
         return -1;
     }
 
@@ -245,13 +242,24 @@ int send_data(int sock_fd, hdata_t *data)
         buffer[size] = '\0';
     }
 
-    if(*buffer == '0')
+    if(strcmp(buffer, "ACC"))
     {
-    }else if(*buffer == '1')
-    {
-        fprintf(stderr, "ERROR");
-        return 1;
+        fprintf(stderr, "ERROR %s", buffer);
     }
 
+    if (send(sock_fd, data->kernel, strlen(data->kernel), 0)  != strlen(data->kernel))
+    {
+        printf("Second send() error");
+        free(buffer);
+        return -1;
+    }
+
+    size = recv(sock_fd, buffer, BUF-1, 0);
+    if (size > 0)
+    {
+        buffer[size] = '\0';
+    }
+
+    free(buffer);
     return 0;
 }

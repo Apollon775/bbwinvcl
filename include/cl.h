@@ -18,6 +18,8 @@ typedef struct _hostdata hdata_t;
 
 int connectto(char *inetaddr, int port);
 
+char* read_hostname();
+
 hdata_t* hdata_init();
 
 int send_data(int sock_fd, hdata_t *data);

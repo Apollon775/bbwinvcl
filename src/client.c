@@ -7,7 +7,7 @@
 #include <string.h>
 
 #include "cl.h"
-
+#include "ifdata.h"
 
 int main (int argc, char **argv)
 {
@@ -15,9 +15,6 @@ int main (int argc, char **argv)
     hdata_t *data = hdata_init();
     int size;
 
-    printf("%i\n", strlen(data->name));
-    printf("%s\n", data->kernel);
-    printf("%s\n",data->cpu);
 
 
     if ((sock = connectto(NULL, 6661)) < 0)
@@ -26,7 +23,10 @@ int main (int argc, char **argv)
        return EXIT_FAILURE;
     }
 
-    send_data(sock, data);
+    if(send_data(sock, data))
+    {
+        printf("send() error");
+    }
 
     hdata_del(data);
 
