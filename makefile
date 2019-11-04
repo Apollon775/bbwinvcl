@@ -6,11 +6,11 @@ INCLUDE=include/
 
 .PHONY=all bbwinvcl clean
 
-cl.o: include/cl.o
-	${CC} -c include/cl.c -o cl.o
+object: include/cl.o
+	${CC} -c include/cl.c include/ifdata.c 
 
-bbwinvcl: src/client.c cl.o
-	${CC} -I${INCLUDE} -g src/client.c src/ifdata.c cl.o -o ${TARGET}
+bbwinvcl: src/client.c object
+	${CC} -I${INCLUDE} -g src/client.c  cl.o ifdata.o -o ${TARGET}
 
 clean: bbwinvcl
 	rm *.o

@@ -1,4 +1,8 @@
+#pragma once
+
 #include <stdlib.h>
+#include "ifdata.h"
+
 #define BUFFER 256
 
 
@@ -8,10 +12,7 @@ struct _hostdata
     char *name;
     char *kernel;
     char *cpu;
-/*
-    char *physical; 
-    char *in_addr;
-*/
+    ifdata_t **interfaces;
 };
 
 typedef struct _hostdata hdata_t;

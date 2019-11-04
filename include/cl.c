@@ -9,6 +9,7 @@
 #include <string.h>
 
 #include "cl.h"
+#include "ifdata.h"
 
 #define BUF 255
 #define BUFFER 256
@@ -131,14 +132,6 @@ char* read_cpuinfo()
     return finalstr;
 }
 
-char* read_addr()
-{
-    
-}
-
-
-
-
 char* read_kernel()
 {
     FILE* version = fopen("/proc/version","r");
@@ -198,6 +191,8 @@ hdata_t* hdata_init()
     data->name = read_hostname();
     data->cpu = read_cpuinfo();
     data->kernel = read_kernel();
+    data->interfaces = ifdata_init();
+
 /*
     if(data->name == NULL ||
         data->cpu == NULL ||
@@ -219,6 +214,11 @@ void hdata_del(hdata_t *data)
     free(data->name);
     free(data->cpu);
     free(data->kernel);
+
+    for(int i = 0; data->interfaces[i] != NULL; ++i)
+    {
+        ifdata_del(data->interfaces[i]);
+    }
     free(data);
 }
 
@@ -227,6 +227,8 @@ int send_data(int sock_fd, hdata_t *data)
     int size;
 
     char* buffer = malloc(BUF);
+
+    // ---------Hostname ---------------
 
     if (send(sock_fd, data->name, strlen(data->name), 0)  != strlen(data->name))
     {
@@ -247,6 +249,8 @@ int send_data(int sock_fd, hdata_t *data)
         fprintf(stderr, "ERROR %s", buffer);
     }
 
+    // ---------- Kernel --------------------
+
     if (send(sock_fd, data->kernel, strlen(data->kernel), 0)  != strlen(data->kernel))
     {
         printf("Second send() error");
@@ -259,6 +263,9 @@ int send_data(int sock_fd, hdata_t *data)
     {
         buffer[size] = '\0';
     }
+
+    // ---------Interfaces_-----------------
+
 
     free(buffer);
     return 0;
