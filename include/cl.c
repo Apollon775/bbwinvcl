@@ -209,6 +209,8 @@ hdata_t* hdata_init()
     return data;
 }
 
+
+
 void hdata_del(hdata_t *data)
 {
     free(data->name);
@@ -222,10 +224,11 @@ void hdata_del(hdata_t *data)
     free(data);
 }
 
+
+
 int send_data(int sock_fd, hdata_t *data)
 {
     int size;
-
     char* buffer = malloc(BUF);
 
     // ---------Hostname ---------------
@@ -249,6 +252,7 @@ int send_data(int sock_fd, hdata_t *data)
         fprintf(stderr, "ERROR %s", buffer);
     }
 
+
     // ---------- Kernel --------------------
 
     if (send(sock_fd, data->kernel, strlen(data->kernel), 0)  != strlen(data->kernel))
@@ -264,8 +268,70 @@ int send_data(int sock_fd, hdata_t *data)
         buffer[size] = '\0';
     }
 
-    // ---------Interfaces_-----------------
+    //----------CPU------------
+    if (send(sock_fd, data->cpu, strlen(data->cpu), 0)  != strlen(data->cpu))
+    {
+        printf("third send() error");
+        free(buffer);
+        return -1;
+    }
 
+    size = recv(sock_fd, buffer, BUF-1, 0);
+    if (size > 0)
+    {
+        buffer[size] = '\0';
+    }
+
+    // ---------Interfaces-----------------
+    
+    for (int i = 0; data->interfaces[i] != NULL; ++i)
+    {
+
+        //Ignoriere Loopback Interfaces
+        if (!strcmp(data->interfaces[i]->name, "lo"))
+            continue;
+
+        if (send(sock_fd, data->interfaces[i]->physical, strlen(data->interfaces[i]->physical), 0)  != strlen(data->interfaces[i]->physical))
+        {
+            free(buffer);
+            return -1;
+        }
+
+        if (send(sock_fd, data->interfaces[i]->ipv4, strlen(data->interfaces[i]->ipv4), 0)  != strlen(data->interfaces[i]->ipv4))
+        {
+            free(buffer);
+            return -1;
+        }
+
+        if (send(sock_fd, "\0", strlen("\0"), 0)  != strlen("\0"))
+        {
+            free(buffer);
+            return -1;
+        }
+
+        size = recv(sock_fd, buffer, BUF-1, 0);
+        if (size > 0)
+        {
+            buffer[size] = '\0';
+        }
+
+        if (data->interfaces[i+1] != NULL)
+        {
+            if (send(sock_fd, "NXT", strlen("NXT"), 0)  != strlen("NXT"))
+            {
+                free(buffer);
+                return -1;
+            }
+        }
+        else
+        {
+            if (send(sock_fd, "FIN", strlen("FIN"), 0)  != strlen("FIN"))
+            {
+                free(buffer);
+                return -1;
+            }
+        }
+    }
 
     free(buffer);
     return 0;
