@@ -1,16 +1,18 @@
-CC=gcc
-CFLAGS=
-CLIBS=
+CC=g++
+SOURCE=include/cl.cpp include/ifdata.cpp include/MainFrame.cpp
+OBJECT= *.o
 TARGET=release/bbwinvcl
-INCLUDE=include/
+INCLUDE=-Iinclude/ `wx-config --cxxflags`
+LIBS=`wx-config --libs`
+
 
 .PHONY=all bbwinvcl clean
 
 object: include/cl.o
-	${CC} -c include/cl.c include/ifdata.c 
+	${CC} -c ${SOURCE} ${INCLUDE}
 
 bbwinvcl: src/client.c object
-	${CC} -I${INCLUDE} -g src/client.c  cl.o ifdata.o -o ${TARGET}
+	${CC} ${INCLUDE} ${LIBS} -g src/client.c  ${OBJECT} -o ${TARGET}
 
 clean: bbwinvcl
 	rm *.o
