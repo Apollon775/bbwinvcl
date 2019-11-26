@@ -11,6 +11,7 @@ struct _hostdata
 {
     char *name;
     char *kernel;
+    char *user;
     char *cpu;
     ifdata_t **interfaces;
 };
